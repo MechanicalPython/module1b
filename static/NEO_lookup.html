@@ -1,0 +1,106 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--        }-->
+
+<!--        table {-->
+<!--            width: 100%;-->
+<!--            border-collapse: collapse;-->
+<!--            margin: 20px 0;-->
+<!--        }-->
+
+<!--        th, td {-->
+<!--            padding: 10px;-->
+<!--            text-align: left;-->
+<!--            border-bottom: 1px solid #ddd;-->
+<!--        }-->
+
+<!--        th {-->
+<!--            background-color: #f2f2f2;-->
+<!--        }-->
+
+<!--        .hazardous {-->
+<!--            color: red;-->
+<!--        }-->
+
+<!--        .non-hazardous {-->
+<!--            color: green;-->
+<!--        }-->
+<!--    </style>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>{{neo_name}}</title>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--</body>-->
+<!--</html>-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroid Approach Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .hazardous {
+            color: red;
+        }
+
+        .non-hazardous {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <h1>{{neo_name}}</h1>
+    <h2>{{#if hazardous}}Hazard{{else}}Safe{{/if}}</h2>
+    <h3>Diamiter (km): {{diameter}}</h3>
+    <h3>Orbit Eccentricity: {{eccentricity}}</h3>
+    <h3>Orbit Inclination: {{inclination}}</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Time</th>
+            <th>Planet</th>
+            <th>Miss-Distance (km)</th>
+            <th>Velocity (km/s)</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each close_approach}}
+        <tr>
+            <td>{{date}}</td>
+            <td>{{orbiting_body}}</td>
+            <td>{{miss_distance}}</td>
+            <td>{{velocity}}</td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
+
