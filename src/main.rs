@@ -19,8 +19,7 @@ struct NeoDateSearch {
 
 mod neo_feed {
     use std::fs::{read_to_string};
-    use std::io::Read;
-    use actix_web::{get, post, web, HttpResponse, Responder};
+    use actix_web::{get, web, HttpResponse, Responder};
     use handlebars::Handlebars;
     use reqwest::Client;
     use serde::{Deserialize, Serialize};
@@ -34,7 +33,7 @@ mod neo_feed {
         distance: String,
         time: String,
         hazardous: bool,
-        link: String,
+        reference_id: String,
     }
     #[derive(Deserialize, Serialize)]
     struct NeoFeedDetailsVec {
@@ -42,19 +41,20 @@ mod neo_feed {
     }
 
     impl NeoFeed {
-        fn to_neo_vec(self) -> Vec<NeoFeedDetails> {
+        // in neo.close_approach_data, it will be a vec of length 1 always when getting feed data.
+        fn into_neo_feed_details(self) -> Vec<NeoFeedDetails> {
             let mut result_vec: Vec<NeoFeedDetails> = Vec::new();
             for day in self.near_earth_objects.days {
-                let day_string = day.0;
+                let _day_string = day.0;
                 for neo in day.1 {
                     let n = NeoFeedDetails {
                         name: neo.name,
                         size: neo.estimated_diameter.kilometers.estimated_diameter_max.to_string(),
-                        velocity: neo.close_approach_data.get(0).unwrap().relative_velocity.kilometers_per_hour.to_string(),
-                        distance: neo.close_approach_data.get(0).unwrap().miss_distance.kilometers.to_string(),
-                        time: neo.close_approach_data.get(0).unwrap().close_approach_date_full.to_string(),
+                        velocity: neo.close_approach_data.first().unwrap().relative_velocity.kilometers_per_hour.to_string(),
+                        distance: neo.close_approach_data.first().unwrap().miss_distance.kilometers.to_string(),
+                        time: neo.close_approach_data.first().unwrap().close_approach_date_full.to_string(),
                         hazardous: neo.is_potentially_hazardous_asteroid,
-                        link: format!("/neo/{}", neo.neo_reference_id),
+                        reference_id: neo.neo_reference_id,
                     };
                     result_vec.push(n);
                 }
@@ -81,7 +81,7 @@ mod neo_feed {
         let neo_data = response.json::<NeoFeed>().await.unwrap();
 
         let feed = NeoFeedDetailsVec {
-            neos: neo_data.to_neo_vec()
+            neos: neo_data.into_neo_feed_details()
         };
         let rendered = handlebars.render("NEO_feed", &feed).unwrap();
         HttpResponse::Ok().body(rendered)
@@ -115,7 +115,7 @@ mod neo_lookup {
     }
 
     impl NeoLookup {
-        fn to_hbs_format(self) -> NeoLookupDetails {
+        fn into_hbs_format(self) -> NeoLookupDetails {
             let mut close_approaches: Vec<NeoApproachData> = Vec::new();
             for approach in self.close_approach_data {
                 let a = NeoApproachData {
@@ -138,12 +138,12 @@ mod neo_lookup {
         }
     }
     #[get("/neo/{neo_id}")]
-    pub async fn get_single_neo(path: web::Path<(u32)>, handlebars: web::Data<Handlebars<'_>>) -> impl Responder {
+    pub async fn get_single_neo(path: web::Path<u32>, handlebars: web::Data<Handlebars<'_>>) -> impl Responder {
         let api_key = read_to_string("api_key").unwrap_or("DEMO_KEY".to_string());
         let api_call = format!("https://api.nasa.gov/neo/rest/v1/neo/{}?api_key={}", path.into_inner(), api_key);
         let response = Client::new().get(api_call).send().await.unwrap();
         let neo_data = response.json::<NeoLookup>().await.unwrap();
-        let feed = neo_data.to_hbs_format();
+        let feed = neo_data.into_hbs_format();
         let rendered = handlebars.render("NEO_lookup", &feed).unwrap();
         HttpResponse::Ok().body(rendered)
     }
