@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 
 /// Structs to define the JSON coming from the NASA NEO API.
 /// There are two types of API calls/returns.
@@ -199,7 +199,7 @@ pub struct MissDistance {
 }
 
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct NeoLookup {
     pub links: NeoLinks,
     pub id: String,
@@ -215,14 +215,14 @@ pub struct NeoLookup {
     pub is_sentry_object: bool,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct OrbitClass {
     pub orbit_class_type: String,
     pub orbit_class_description: String,
     pub orbit_class_range: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct OrbitalData {
     pub orbit_id: String,
     pub orbit_determination_date: String,

@@ -1,13 +1,14 @@
 //! # Near Earth Object API investigator.
 //! Basic website design is to have a way of searching NEOs by date range, then picking more
 //! info for a specific NEO.
-//!
+//! ## How to use.
+//! NEO feed = a list of NEOs given a date (or date range)
+//! NEO lookup = details of a single NEO.
 
 mod neo_structs;
 
-use actix_web::{get, middleware, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder, Result};
-use reqwest::Client;
-use crate::neo_structs::NeoFeed;
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
+use actix_files::Files;
 use serde::{Deserialize, Serialize};
 use handlebars::{DirectorySourceOptions, Handlebars};
 
@@ -17,15 +18,16 @@ struct NeoDateSearch {
 }
 
 mod neo_feed {
-    use actix_web::{post, web, HttpResponse, Responder};
+    use std::fs::{read_to_string};
+    use std::io::Read;
+    use actix_web::{get, post, web, HttpResponse, Responder};
     use handlebars::Handlebars;
     use reqwest::Client;
     use serde::{Deserialize, Serialize};
-    use crate::NeoDateSearch;
     use crate::neo_structs::NeoFeed;
 
     #[derive(Deserialize, Serialize)]
-    struct NeoDetails {
+    struct NeoFeedDetails {
         name: String,
         size: String,
         velocity: String,
@@ -35,17 +37,17 @@ mod neo_feed {
         link: String,
     }
     #[derive(Deserialize, Serialize)]
-    struct NeoVec {
-        neos: Vec<NeoDetails>,
+    struct NeoFeedDetailsVec {
+        neos: Vec<NeoFeedDetails>,
     }
 
     impl NeoFeed {
-        fn to_neo_vec(self) -> Vec<NeoDetails> {
-            let mut result_vec: Vec<NeoDetails> = Vec::new();
+        fn to_neo_vec(self) -> Vec<NeoFeedDetails> {
+            let mut result_vec: Vec<NeoFeedDetails> = Vec::new();
             for day in self.near_earth_objects.days {
                 let day_string = day.0;
                 for neo in day.1 {
-                    let n = NeoDetails {
+                    let n = NeoFeedDetails {
                         name: neo.name,
                         size: neo.estimated_diameter.kilometers.estimated_diameter_max.to_string(),
                         velocity: neo.close_approach_data.get(0).unwrap().relative_velocity.kilometers_per_hour.to_string(),
@@ -60,17 +62,25 @@ mod neo_feed {
             result_vec
         }
     }
-    #[post("/date/{date}")]
-    // todo - make it so that the form submission kicks to a date url so that it's easier to pivot from
-    // NEO look up dates.
+
+    #[derive(Deserialize, Serialize, Debug)]
+    struct QueryResponse {
+        neo_search: String,
+    }
+
+    // /date?neo_search=yyyy-mm-dd
     // date format = 2015-09-07
-    pub async fn neo_feed_page(path: web::Path<(String)>, handlebars: web::Data<Handlebars<'_>>) -> impl Responder {
-        let dates = path.into_inner();
-        let api_call = format!("https://api.nasa.gov/neo/rest/v1/feed?start_date={}&end_date={}&api_key=DEMO_KEY", dates, dates);
+    #[get("/date")]
+    pub async fn neo_feed_page(path: web::Query<QueryResponse>, handlebars: web::Data<Handlebars<'_>>) -> impl Responder {
+        println!("{:#?}", path.0);
+
+        let api_key = read_to_string("api_key").unwrap_or("DEMO_KEY".to_string());
+        let api_call = format!("https://api.nasa.gov/neo/rest/v1/feed?start_date={}&end_date={}&api_key={}",
+                               path.neo_search, path.neo_search, api_key);
         let response = Client::new().get(api_call).send().await.unwrap();
         let neo_data = response.json::<NeoFeed>().await.unwrap();
 
-        let feed = NeoVec {
+        let feed = NeoFeedDetailsVec {
             neos: neo_data.to_neo_vec()
         };
         let rendered = handlebars.render("NEO_feed", &feed).unwrap();
@@ -79,6 +89,7 @@ mod neo_feed {
 }
 
 mod neo_lookup {
+    use std::fs::read_to_string;
     use actix_web::{get, web, HttpResponse, Responder};
     use handlebars::Handlebars;
     use reqwest::Client;
@@ -86,17 +97,17 @@ mod neo_lookup {
     use crate::neo_structs::NeoLookup;
 
     #[derive(Deserialize, Serialize, Debug)]
-    struct NeoDetailsForLookupPage {
+    struct NeoLookupDetails {
         neo_name: String,
         diameter: String,
         hazardous: bool,
         eccentricity: String,
         inclination: String,
-        close_approach: Vec<ApproachDataForLookupPage>,
+        close_approach: Vec<NeoApproachData>,
     }
 
     #[derive(Deserialize, Serialize, Debug)]
-    struct ApproachDataForLookupPage {
+    struct NeoApproachData {
         date: String,
         velocity: String,
         miss_distance: String,
@@ -104,10 +115,10 @@ mod neo_lookup {
     }
 
     impl NeoLookup {
-        fn to_hbs_format(self) -> NeoDetailsForLookupPage {
-            let mut close_approaches: Vec<ApproachDataForLookupPage> = Vec::new();
+        fn to_hbs_format(self) -> NeoLookupDetails {
+            let mut close_approaches: Vec<NeoApproachData> = Vec::new();
             for approach in self.close_approach_data {
-                let a = ApproachDataForLookupPage {
+                let a = NeoApproachData {
                     date: approach.close_approach_date,
                     velocity: approach.relative_velocity.kilometers_per_hour.to_string(),
                     miss_distance: approach.miss_distance.kilometers.to_string(),
@@ -116,7 +127,7 @@ mod neo_lookup {
                 close_approaches.push(a);
             }
 
-            NeoDetailsForLookupPage {
+            NeoLookupDetails {
                 neo_name: self.name,
                 diameter: self.estimated_diameter.kilometers.estimated_diameter_max.to_string(),
                 hazardous: self.is_potentially_hazardous_asteroid,
@@ -128,12 +139,11 @@ mod neo_lookup {
     }
     #[get("/neo/{neo_id}")]
     pub async fn get_single_neo(path: web::Path<(u32)>, handlebars: web::Data<Handlebars<'_>>) -> impl Responder {
-        let api_call = format!("https://api.nasa.gov/neo/rest/v1/neo/{}?api_key=DEMO_KEY", path.into_inner());
+        let api_key = read_to_string("api_key").unwrap_or("DEMO_KEY".to_string());
+        let api_call = format!("https://api.nasa.gov/neo/rest/v1/neo/{}?api_key={}", path.into_inner(), api_key);
         let response = Client::new().get(api_call).send().await.unwrap();
         let neo_data = response.json::<NeoLookup>().await.unwrap();
-
         let feed = neo_data.to_hbs_format();
-        println!("{:?}", &feed);
         let rendered = handlebars.render("NEO_lookup", &feed).unwrap();
         HttpResponse::Ok().body(rendered)
     }
@@ -146,8 +156,6 @@ async fn index() -> impl Responder {
         .body(include_str!("../static/index.html"))
 }
 
-// todo - dates can't be in the future.
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let mut handlebars = Handlebars::new();
@@ -159,8 +167,7 @@ async fn main() -> std::io::Result<()> {
                 hidden: false,
                 temporary: false,
             },
-        )
-        .unwrap();
+        ).unwrap();
     let handlebars_ref = web::Data::new(handlebars);
 
     HttpServer::new(move || {
@@ -169,8 +176,10 @@ async fn main() -> std::io::Result<()> {
             .service(index)
             .service(neo_feed::neo_feed_page)
             .service(neo_lookup::get_single_neo)
+            .service(Files::new("/static", "./static"))  // No need to enable file listing unless you actually need want it to be enabled
     })
         .bind(("127.0.0.1", 8080))?
         .run()
         .await
 }
+
