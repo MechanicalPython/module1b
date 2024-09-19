@@ -23,18 +23,19 @@ mod neo_feed {
     use handlebars::Handlebars;
     use reqwest::Client;
     use serde::{Deserialize, Serialize};
-    use crate::neo_structs::NeoFeed;
+    use crate::neo_structs::{NeoFeed};
 
     #[derive(Deserialize, Serialize)]
     struct NeoFeedDetails {
         name: String,
-        size: String,
-        velocity: String,
-        distance: String,
+        size: i32,
+        velocity: i32,
+        distance: i32,
         time: String,
         hazardous: bool,
         reference_id: String,
     }
+
     #[derive(Deserialize, Serialize)]
     struct NeoFeedDetailsVec {
         neos: Vec<NeoFeedDetails>,
@@ -49,9 +50,9 @@ mod neo_feed {
                 for neo in day.1 {
                     let n = NeoFeedDetails {
                         name: neo.name,
-                        size: neo.estimated_diameter.kilometers.estimated_diameter_max.to_string(),
-                        velocity: neo.close_approach_data.first().unwrap().relative_velocity.kilometers_per_hour.to_string(),
-                        distance: neo.close_approach_data.first().unwrap().miss_distance.kilometers.to_string(),
+                        size: neo.estimated_diameter.meters.estimated_diameter_max as i32,
+                        velocity: neo.close_approach_data.first().unwrap().relative_velocity.kilometers_per_hour as i32,
+                        distance: neo.close_approach_data.first().unwrap().miss_distance.kilometers as i32,
                         time: neo.close_approach_data.first().unwrap().close_approach_date_full.to_string(),
                         hazardous: neo.is_potentially_hazardous_asteroid,
                         reference_id: neo.neo_reference_id,
@@ -72,14 +73,11 @@ mod neo_feed {
     // date format = 2015-09-07
     #[get("/date")]
     pub async fn neo_feed_page(path: web::Query<QueryResponse>, handlebars: web::Data<Handlebars<'_>>) -> impl Responder {
-        println!("{:#?}", path.0);
-
         let api_key = read_to_string("api_key").unwrap_or("DEMO_KEY".to_string());
         let api_call = format!("https://api.nasa.gov/neo/rest/v1/feed?start_date={}&end_date={}&api_key={}",
                                path.neo_search, path.neo_search, api_key);
         let response = Client::new().get(api_call).send().await.unwrap();
-        let neo_data = response.json::<NeoFeed>().await.unwrap();
-
+        let neo_data = response.json::<NeoFeed>().await.unwrap();  // Error if struct type doesn't match json type.
         let feed = NeoFeedDetailsVec {
             neos: neo_data.into_neo_feed_details()
         };
@@ -99,7 +97,7 @@ mod neo_lookup {
     #[derive(Deserialize, Serialize, Debug)]
     struct NeoLookupDetails {
         neo_name: String,
-        diameter: String,
+        diameter: i32,
         hazardous: bool,
         eccentricity: String,
         inclination: String,
@@ -109,8 +107,8 @@ mod neo_lookup {
     #[derive(Deserialize, Serialize, Debug)]
     struct NeoApproachData {
         date: String,
-        velocity: String,
-        miss_distance: String,
+        velocity: i32,
+        miss_distance: i32,
         orbiting_body: String,
     }
 
@@ -120,8 +118,8 @@ mod neo_lookup {
             for approach in self.close_approach_data {
                 let a = NeoApproachData {
                     date: approach.close_approach_date,
-                    velocity: approach.relative_velocity.kilometers_per_hour.to_string(),
-                    miss_distance: approach.miss_distance.kilometers.to_string(),
+                    velocity: approach.relative_velocity.kilometers_per_hour as i32,
+                    miss_distance: approach.miss_distance.kilometers as i32,
                     orbiting_body: approach.orbiting_body.to_string(),
                 };
                 close_approaches.push(a);
@@ -129,7 +127,7 @@ mod neo_lookup {
 
             NeoLookupDetails {
                 neo_name: self.name,
-                diameter: self.estimated_diameter.kilometers.estimated_diameter_max.to_string(),
+                diameter: self.estimated_diameter.kilometers.estimated_diameter_max as i32,
                 hazardous: self.is_potentially_hazardous_asteroid,
                 eccentricity: self.orbital_data.eccentricity.to_string(),
                 inclination: self.orbital_data.inclination.to_string(),

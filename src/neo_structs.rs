@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use serde::{Deserialize};
+use serde::{Deserialize, Deserializer};
 
 /// Structs to define the JSON coming from the NASA NEO API.
 /// There are two types of API calls/returns.
@@ -185,17 +185,26 @@ pub struct CloseApproachData {
 
 #[derive(Debug, serde::Deserialize)]
 pub struct RelativeVelocity {
-    pub kilometers_per_second: String,
-    pub kilometers_per_hour: String,
-    pub miles_per_hour: String,
+    #[serde(deserialize_with = "string_to_f64")]
+    pub kilometers_per_second: f64,
+    #[serde(deserialize_with = "string_to_f64")]
+    pub kilometers_per_hour: f64,
+    #[serde(deserialize_with = "string_to_f64")]
+    pub miles_per_hour: f64,
 }
+
+
 
 #[derive(Debug, serde::Deserialize)]
 pub struct MissDistance {
-    pub astronomical: String,
-    pub lunar: String,
-    pub kilometers: String,
-    pub miles: String,
+    #[serde(deserialize_with = "string_to_f64")]
+    pub astronomical: f64,
+    #[serde(deserialize_with = "string_to_f64")]
+    pub lunar: f64,
+    #[serde(deserialize_with = "string_to_f64")]
+    pub kilometers: f64,
+    #[serde(deserialize_with = "string_to_f64")]
+    pub miles: f64,
 }
 
 
@@ -249,3 +258,11 @@ pub struct OrbitalData {
     pub orbit_class: OrbitClass,
 }
 
+
+fn string_to_f64<'de, D>(deserializer: D) -> Result<f64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s: String = Deserialize::deserialize(deserializer)?;
+    s.parse::<f64>().map_err(serde::de::Error::custom)
+}

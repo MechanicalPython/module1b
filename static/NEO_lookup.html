@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../static/style.css">
 
 </head>
+<a href="/">Home</a>
 <body>
 <div>
     <h1>{{neo_name}}</h1>
@@ -28,8 +29,8 @@
         <tr>
             <td><a href="/date?neo_search={{date}}" style="cursor:pointer">{{date}}</a></td>
             <td>{{orbiting_body}}</td>
-            <td>{{miss_distance}}</td>
-            <td>{{velocity}}</td>
+            <td align-text="right">{{miss_distance}}</td>
+            <td justify="right">{{velocity}}</td>
         </tr>
         {{/each}}
         </tbody>

@@ -4,19 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/style.css">
-    <title>Date Input Form</title>
+    <title>Input A Date</title>
+    <style>
 
+        .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .date-input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 200px;
+            margin-right: 10px;
+            transition: border-color 0.3s;
+        }
+
+        .date-input:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+
+        .search-button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <h1>Date Input Form</h1>
+    <h1>Near Earth Object Finder</h1>
     <form action="/date" method=get>
         <label for="neo_search">Start Date:</label>
         <input type="date" id="neo_search" name="neo_search" required>
         <button type="submit">Submit</button>
     </form>
-    <h2>API Response:</h2>
-    <pre id="response-data">Awaiting response...</pre>
 </div>
 </body>
 </html>
