@@ -10,27 +10,26 @@
         background-color: #363B40;
         color: #b8bfc6;
     }
+    h1, h2, h3, h4, h5, h6 {
+        color: ghostwhite;
+    }
     a:visited {
         color: green;
     }
-    /* Style for unvisited links */
     a:link {
         color: green;
-        text-decoration: none; /* Remove underline */
+        text-decoration: none;
     }
 
-    /* Style for visited links */
     a:visited {
         color: darkgreen;
     }
 
-    /* Style for links on hover */
     a:hover {
         color: limegreen;
-        text-decoration: underline; /* Optional: underline on hover */
+        text-decoration: underline;
     }
 
-    /* Style for links that are active (clicked) */
     a:active {
         color: darkolivegreen;
     }
@@ -74,7 +73,7 @@ th {
 }
 
 h1 {
-    color: #333;
+    /*color: #333;*/
     margin-bottom: 20px;
 }
 
@@ -105,3 +104,10 @@ h1 {
 .search-button:hover {
     background-color: #0056b3;
 }
+
+table.lookup_table td:nth-child(1) { text-align: left; }
+table.lookup_table th:nth-child(1) { text-align: left; }
+
+table.lookup_table th:nth-child(2) { text-align: left; }
+table.lookup_table td:nth-child(2) { text-align: left; }
+

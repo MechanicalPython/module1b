@@ -5,17 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asteroid Approach Data</title>
     <link rel="stylesheet" href="../static/style.css">
-
 </head>
 <a href="/">Home</a>
 <body>
 <div>
     <h1>{{neo_name}}</h1>
     <h2>{{#if hazardous}}Hazard{{else}}Safe{{/if}}</h2>
-    <h3>Diamiter (km): {{diameter}}</h3>
+    <h3>Diameter (m): {{diameter}}</h3>
     <h3>Orbit Eccentricity: {{eccentricity}}</h3>
     <h3>Orbit Inclination: {{inclination}}</h3>
-    <table>
+    <table class="lookup_table">
         <thead>
         <tr>
             <th>Time</th>
@@ -29,8 +28,8 @@
         <tr>
             <td><a href="/date?neo_search={{date}}" style="cursor:pointer">{{date}}</a></td>
             <td>{{orbiting_body}}</td>
-            <td align-text="right">{{miss_distance}}</td>
-            <td justify="right">{{velocity}}</td>
+            <td>{{miss_distance}}</td>
+            <td>{{velocity}}</td>
         </tr>
         {{/each}}
         </tbody>

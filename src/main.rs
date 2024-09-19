@@ -121,7 +121,7 @@ mod neo_lookup {
 
             NeoLookupDetails {
                 neo_name: self.name,
-                diameter: self.estimated_diameter.kilometers.estimated_diameter_max as i32,
+                diameter: self.estimated_diameter.meters.estimated_diameter_max as i32,
                 hazardous: self.is_potentially_hazardous_asteroid,
                 eccentricity: self.orbital_data.eccentricity.to_string(),
                 inclination: self.orbital_data.inclination.to_string(),
