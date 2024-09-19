@@ -56,7 +56,7 @@
                 from.getTime() +
                 Math.random() * (to.getTime() - from.getTime()),
             );
-            window.location="/date/" + date.toISOString().split('T')[0]
+            window.location="/date?neo_search=" + date.toISOString().split('T')[0]
         }
     </script>
 </head>
