@@ -9,13 +9,7 @@ mod neo_structs;
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use actix_files::Files;
-use serde::{Deserialize, Serialize};
 use handlebars::{DirectorySourceOptions, Handlebars};
-
-#[derive(Deserialize, Serialize)]
-struct NeoDateSearch {
-    date: String,
-}
 
 mod neo_feed {
     use std::fs::{read_to_string};
