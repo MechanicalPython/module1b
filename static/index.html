@@ -48,15 +48,33 @@
             background-color: #0056b3;
         }
     </style>
+    <script>
+        function generateRandomDate() {
+            let from = new Date(1900, 0, 0);
+            let to = new Date(2100, 0, 0);
+            let date = new Date(
+                from.getTime() +
+                Math.random() * (to.getTime() - from.getTime()),
+            );
+            window.location="/date/" + date.toISOString().split('T')[0]
+        }
+    </script>
 </head>
 <body>
 <div class="container">
     <h1>Near Earth Object Finder</h1>
-    <form action="/date" method=get>
+    <form action="/date" method=get id="manual_form">
         <label for="neo_search">Start Date:</label>
         <input type="date" id="neo_search" name="neo_search" required>
         <button type="submit">Submit</button>
     </form>
+</div>
+
+<div class="container">
+    <h2>I'm feeling lucky</h2>
+    <button onclick="generateRandomDate()">
+        Random
+    </button>
 </div>
 </body>
 </html>
