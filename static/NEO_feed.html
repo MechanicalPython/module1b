@@ -5,36 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/style.css">
     <title>NEOs</title>
-</head>
-<body>
-<a href="/">Home</a>
-<h1>Near Earth Objects</h1>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Size (m)</th>
-        <th>Velocity at close approach (kph)</th>
-        <th>Distance at close approach (km)</th>
-        <th>Time of closest approach</th>
-        <th>Potentially Hazardous</th>
-    </tr>
-    </thead>
-    <tbody>
-    {{#each neos}}
-    <tr>
-        <td> <a href="/neo/{{reference_id}}" style="cursor:pointer">{{name}}</a></td>
-        <td>{{size}}</td>
-        <td>{{velocity}}</td>
-        <td>{{distance}}</td>
-        <td>{{time}}</td>
-        <td class="{{#if hazardous}}hazardous{{else}}non-hazardous{{/if}}">
-            {{#if hazardous}}Yes{{else}}No{{/if}}
-        </td>
-    </tr>
-    {{/each}}
-    </tbody>
-</table>
+    <style>
+        .stats-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 15px;
+            border: 2px solid #ccc;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            color: #333;
+        }
 
+        .stat {
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<a href="/">Home</a>
+<body>
+<div class="stats-container">
+    <div class="stat">
+        <span class="stat-label">Fastest:</span>
+        <span id="fastest">{{fastest}} Kph</span>
+    </div>
+    <div class="stat">
+        <span class="stat-label">Closest:</span>
+        <span id="closest">{{closest}} Km</span>
+    </div>
+    <div class="stat">
+        <span class="stat-label">NEOs scanned:</span>
+        <span id="neos_seen">{{neos_seen}}</span>
+    </div>
+</div>
+
+<div>
+
+    <h1>Near Earth Objects</h1>
+    <br>
+    <br>
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Size (m)</th>
+            <th>Velocity at close approach (kph)</th>
+            <th>Distance at close approach (km)</th>
+            <th>Time of closest approach</th>
+            <th>Potentially Hazardous</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each neos}}
+        <tr>
+            <td><a href="/neo/{{reference_id}}" style="cursor:pointer">{{name}}</a></td>
+            <td>{{size}}</td>
+            <td>{{velocity}}</td>
+            <td>{{distance}}</td>
+            <td>{{time}}</td>
+            <td class="{{#if hazardous}}hazardous{{else}}non-hazardous{{/if}}">
+                {{#if hazardous}}Yes{{else}}No{{/if}}
+            </td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</div>
 </body>
 </html>

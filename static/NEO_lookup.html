@@ -5,9 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asteroid Approach Data</title>
     <link rel="stylesheet" href="../static/style.css">
+    <style>
+        .stats-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 15px;
+            border: 2px solid #ccc;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .stat {
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <a href="/">Home</a>
 <body>
+
+<div class="stats-container">
+    <div class="stat">
+        <span class="stat-label">Fastest:</span>
+        <span id="fastest">{{fastest}} Kph</span>
+    </div>
+    <div class="stat">
+        <span class="stat-label">Closest:</span>
+        <span id="closest">{{closest}} Km</span>
+    </div>
+    <div class="stat">
+        <span class="stat-label">NEOs scanned:</span>
+        <span id="neos_seen">{{neos_seen}}</span>
+    </div>
+</div>
+
+
 <div>
     <h1>{{neo_name}}</h1>
     <h2>{{#if hazardous}}Hazard{{else}}Safe{{/if}}</h2>
@@ -20,7 +57,7 @@
             <th>Time</th>
             <th>Planet</th>
             <th>Miss-Distance (km)</th>
-            <th>Velocity (km/s)</th>
+            <th>Velocity (km/h)</th>
         </tr>
         </thead>
         <tbody>

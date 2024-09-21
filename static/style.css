@@ -35,6 +35,30 @@
     }
 }
 
+
+.stats-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 15px;
+    /*background-color: #f0f0f0;*/
+    border: 2px solid #ccc;
+    /*border-radius: 8px;*/
+    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    color: #333;
+}
+
+.stat {
+    margin: 5px 0;
+}
+
+.stat-label {
+    font-weight: bold;
+}
+
+
 body {
     font-family: Arial, sans-serif;
 }
@@ -63,7 +87,6 @@ th {
     color: green;
 }
 
-
 .container {
     background: white;
     border-radius: 8px;
@@ -73,7 +96,6 @@ th {
 }
 
 h1 {
-    /*color: #333;*/
     margin-bottom: 20px;
 }
 
